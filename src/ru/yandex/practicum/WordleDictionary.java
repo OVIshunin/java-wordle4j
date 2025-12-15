@@ -8,7 +8,7 @@ public class WordleDictionary {
 
     private List<String> words;
 
-    public WordleDictionary(){
+    public WordleDictionary() {
         words = new ArrayList<>();
     }
 
@@ -17,11 +17,11 @@ public class WordleDictionary {
         return wordList.get(new Random().nextInt(wordList.size()));
     }
 
-    public void addWord(String word){
+    public void addWord(String word) {
         words.add(word);
     }
 
-    public List<String> getWordsList(){
+    public List<String> getWordsList() {
         return words;
     }
 
