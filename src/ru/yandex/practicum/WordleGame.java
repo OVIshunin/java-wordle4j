@@ -74,7 +74,7 @@ public class WordleGame {
                 /*если слово не в 5 символов или такого не существует(нет в словаре) -
                 ошибка, и не списываем попытку
                  */
-                } catch ( InvalidWordLengthException | WordNotFoundInDictionary e) {
+                } catch (InvalidWordLengthException | WordNotFoundInDictionary e) {
                     System.out.println("Ошибка: " + e.getMessage());
                     logger.log("Ошибка ввода: " + e.getMessage());
                     attempt--; // не засчитывать попытку
