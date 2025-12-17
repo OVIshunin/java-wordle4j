@@ -19,7 +19,7 @@ public class WordleDictionaryLoader {
                 }
             }
         }
-        if (words.getWordsList().size() == 0){
+        if (words.getWordsList().size() == 0) {
            throw new LoadedDictionaryIsEmpty();
         } else {
             return words;
