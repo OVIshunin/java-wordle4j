@@ -10,10 +10,11 @@ import java.util.Set;
 public class WordleGame {
 
     private String answer;
-    private WordleDictionary dictionary;
-    private WordleConditions conditions;
+    private final WordleDictionary dictionary;
+    private final WordleConditions conditions;
     private final Set<String> guessedWords;   // Уже введённые слова
     private final WordleLogger logger;
+    private int attempt;
 
     // Маска совпадений
     private static final char C_CORRECT_CHAR = '+';
@@ -23,77 +24,14 @@ public class WordleGame {
 
     public WordleGame(WordleDictionary dictionary) throws IOException {
         this.dictionary = dictionary;
-          this.answer = dictionary.pickRandomWord();
+        this.answer = dictionary.pickRandomWord();
         conditions = new WordleConditions();
         this.guessedWords = new HashSet<>();
         this.logger = new WordleLogger();
-    }
-
-    public void start() {
-
-        //для теста
-        //System.out.println("Мы загадали слово: " + answer);
-
-        int attempt = 0;
-
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Добро пожаловать в Wordle! У вас 6 попыток.");
         logger.log("Игра начата. Загаданное слово: " + answer);
-
-        //внешний блок - на исключение по количеству ошибок
-        try {
-            while (true) {
-
-                attempt++;
-                System.out.print("Попытка " + attempt + "/" + C_GUESSES_COUNT + ". Введите слово: ");
-                String guess = scanner.nextLine().trim().toLowerCase();
-
-                //Запрос подсказки (если вместо слова - вводится просто ентер - ввод нулевой длины
-                if (guess.length() == 0) {
-                    String hint = findHint();
-                    if (hint != null) {
-                        System.out.println("Подсказка: " + hint);
-                        guess = hint;
-                        logger.logHint(hint);
-                    } else {
-                        System.out.println("Подсказка не найдена.");
-                        logger.logHint(null);
-                    }
-                }
-
-                //попытка с обработкой ошибок в случае некорректного ввода
-                try {
-                    String result = makeGuess(guess);
-                    System.out.println("Результат: " + result);
-
-                    if (result.equals("+++++")) {
-                        System.out.println("Победа! Загаданное слово: " + answer);
-                        logger.logWin(answer, attempt); // логируем победу
-                        return;
-                    }
-                /*если слово не в 5 символов или такого не существует(нет в словаре) -
-                ошибка, и не списываем попытку
-                 */
-                } catch (InvalidWordLengthException | WordNotFoundInDictionary e) {
-                    System.out.println("Ошибка: " + e.getMessage());
-                    logger.log("Ошибка ввода: " + e.getMessage());
-                    attempt--; // не засчитывать попытку
-                } catch (NoAttemptsLeftException e) {
-                    //превышение попыток - выкидываем исключение выше и завершаем игру
-                    throw new NoAttemptsLeftException();
-                }
-
-            }
-
-        } catch (NoAttemptsLeftException e) {
-            System.out.println("Игра окончена. " + e.getMessage());
-            System.out.println("Загаданное слово: " + answer);
-            logger.logLoss(answer); // логируем поражение
-        } finally {
-            logger.close();
-        }
-
+        attempt = 0;
     }
+
 
     public String makeGuess(String guess) throws InvalidWordLengthException, WordNotFoundInDictionary, NoAttemptsLeftException {
 
@@ -115,11 +53,13 @@ public class WordleGame {
         logger.logGuess(guess, result);
 
         if (result.equals("+++++")) {
+            logger.logWin(answer, attempt); // логируем победу
             return result;
         }
 
         // Проверка оставшихся попыток
         if (guessedWords.size() >= C_GUESSES_COUNT) {
+            logger.logLoss(answer); // логируем поражение
             throw new NoAttemptsLeftException();
         }
 
@@ -127,12 +67,14 @@ public class WordleGame {
     }
 
     //найти подсказку
-    private String findHint() {
+    public String findHint() {
         for (String word : dictionary.getWordsList()) {
             if (isValid(word)) {
+                logger.logHint(word);
                 return word;
             }
         }
+        logger.logHint(null);
         return null; // Нет подходящих слов
     }
 
@@ -226,5 +168,25 @@ public class WordleGame {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public void addAttempt() {
+        attempt++;
+    }
+
+    public void  subAttempt() {
+        attempt--;
+    }
+
+    public int getAttempt() {
+        return attempt;
+    }
+
+    public int getAttemptsCount() {
+        return C_GUESSES_COUNT;
+    };
+
+    public void setLog(String message) {
+        logger.log(message);
     }
 }

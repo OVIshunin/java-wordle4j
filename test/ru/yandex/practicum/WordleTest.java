@@ -19,7 +19,7 @@ class WordleTest {
 
     // Подготавливаем тестовый словарь
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() throws IOException, LoadedDictionaryIsEmpty {
         // Создаём временный файл словаря
         String content = "яблоко\nветер\nгород\nокно\nроза\nастра";
         Files.writeString(Path.of(TEST_DICT), content);

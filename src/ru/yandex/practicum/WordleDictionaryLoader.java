@@ -3,12 +3,14 @@ package ru.yandex.practicum;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class WordleDictionaryLoader {
 
-    public WordleDictionary loadDictionary(String filename) throws IOException {
+    public WordleDictionary loadDictionary(String filename) throws IOException, LoadedDictionaryIsEmpty {
         WordleDictionary words = new WordleDictionary();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+        //явно указал кодировку для чтения файла
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String word = line.trim().toLowerCase().replace('ё','е');
@@ -17,7 +19,11 @@ public class WordleDictionaryLoader {
                 }
             }
         }
-        return words;
+        if (words.getWordsList().size() == 0){
+           throw new LoadedDictionaryIsEmpty();
+        } else {
+            return words;
+        }
     }
 
 
