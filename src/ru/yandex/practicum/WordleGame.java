@@ -3,7 +3,6 @@ package ru.yandex.practicum;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
 
@@ -174,7 +173,7 @@ public class WordleGame {
         attempt++;
     }
 
-    public void  subAttempt() {
+    public void subAttempt() {
         attempt--;
     }
 
@@ -184,7 +183,7 @@ public class WordleGame {
 
     public int getAttemptsCount() {
         return C_GUESSES_COUNT;
-    };
+    }
 
     public void setLog(String message) {
         logger.log(message);
