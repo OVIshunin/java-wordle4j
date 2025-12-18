@@ -1,17 +1,94 @@
 package ru.yandex.practicum;
 
-/*
-в главном классе нам нужно:
-    создать лог-файл (он должен передаваться во все классы)
-    создать загрузчик словарей WordleDictionaryLoader
-    загрузить словарь WordleDictionary с помощью класса WordleDictionaryLoader
-    затем создать игру WordleGame и передать ей словарь
-    вызвать игровой метод в котором в цикле опрашивать пользователя и передавать информацию в игру
-    вывести состояние игры и конечный результат
- */
+import java.io.IOException;
+import java.util.Scanner;
+
+
 public class Wordle {
 
     public static void main(String[] args) {
+
+        //создадим переменную под логгер в основном классе
+        WordleLogger logger = null;
+
+        try {
+            logger = new WordleLogger(); //инициализация логгера в блоке try, так как тоже возможен IOException
+            WordleDictionaryLoader wordsLoader = new WordleDictionaryLoader(logger);//передаем в загрузчик
+            WordleDictionary wDict = wordsLoader.loadDictionary("words_ru.txt");
+            WordleGame game = new WordleGame(wDict, logger);//передаем в класс игры
+            //все System.in и System.out, сканнер - перенесены в метод класса Wordle,
+            // класс WordleGame только предоставляет свои методы
+            startGame(game);
+
+        } catch (IOException e) {
+            System.err.println("Ошибка загрузки словаря: " + e.getMessage());
+            if (logger != null) {
+                logger.log("Ошибка загрузки словаря: " + e.getMessage());
+            }
+            //добавлена обработка всех иных исключений с выводом в консоль и записью в лог
+        } catch (Exception e) {
+            System.err.println("Ошибка: " + e.getMessage());
+            if (logger != null) {
+                logger.log("Ошибка: " + e.getMessage());
+            }
+        } finally {
+            if (logger != null) {
+                logger.close();//закрываем
+            }
+        }
+    }
+
+
+    public static void startGame(WordleGame game) {
+
+        Scanner scanner = new Scanner(System.in);
+
+        //внешний блок - на исключение по количеству ошибок
+        try {
+            while (true) {
+
+                game.addAttempt();
+                System.out.print("Попытка " + game.getAttempt() + "/" + game.getAttemptsCount() + ". Введите слово: ");
+                String guess = scanner.nextLine().trim().toLowerCase();
+
+                //Запрос подсказки (если вместо слова - вводится просто ентер - ввод нулевой длины
+                if (guess.length() == 0) {
+                    String hint = game.findHint();
+                    if (hint != null) {
+                        System.out.println("Подсказка: " + hint);
+                        guess = hint;
+                    } else {
+                        System.out.println("Подсказка не найдена.");
+                    }
+                }
+
+                //попытка с обработкой ошибок в случае некорректного ввода
+                try {
+                    String result = game.makeGuess(guess);
+                    System.out.println("Результат: " + result);
+
+                    if (result.equals("+++++")) {
+                        System.out.println("Победа! Загаданное слово: " + game.getAnswer());
+                        return;
+                    }
+                /*если слово не в 5 символов или такого не существует(нет в словаре) -
+                ошибка, и не списываем попытку
+                 */
+                } catch (InvalidWordLengthException | WordNotFoundInDictionary e) {
+                    System.out.println("Ошибка: " + e.getMessage());
+                    game.setLog("Ошибка ввода: " + e.getMessage());
+                    game.subAttempt(); // не засчитывать попытку
+                } catch (NoAttemptsLeftException e) {
+                    //превышение попыток - выкидываем исключение выше и завершаем игру
+                    throw new NoAttemptsLeftException();
+                }
+
+            }
+
+        } catch (NoAttemptsLeftException e) {
+            System.out.println("Игра окончена. " + e.getMessage());
+            System.out.println("Загаданное слово: " + game.getAnswer());
+        }
 
     }
 
