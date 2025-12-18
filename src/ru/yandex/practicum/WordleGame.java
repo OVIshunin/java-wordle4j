@@ -21,12 +21,12 @@ public class WordleGame {
     private static final char C_ABSENT_CHAR = '-';
     private static final int C_GUESSES_COUNT = 6;
 
-    public WordleGame(WordleDictionary dictionary) throws IOException {
+    public WordleGame(WordleDictionary dictionary, WordleLogger logger) throws IOException {
         this.dictionary = dictionary;
         this.answer = dictionary.pickRandomWord();
         conditions = new WordleConditions();
         this.guessedWords = new HashSet<>();
-        this.logger = new WordleLogger();
+        this.logger = logger;
         logger.log("Игра начата. Загаданное слово: " + answer);
         attempt = 0;
     }
