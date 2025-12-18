@@ -22,12 +22,14 @@ class WordleTest {
     void setUp() throws IOException, LoadedDictionaryIsEmpty {
         // Создаём временный файл словаря
         String content = "яблоко\nветер\nгород\nокно\nроза\nастра";
+        //String content = ""; //если проверить на пустом словаре - в лог теперь пишется ошибка
         Files.writeString(Path.of(TEST_DICT), content);
 
         // Инициализируем игру с тестовым словарём
-        WordleDictionaryLoader wordsLoader = new WordleDictionaryLoader();
+        WordleLogger logger = new WordleLogger();
+        WordleDictionaryLoader wordsLoader = new WordleDictionaryLoader(logger);
         WordleDictionary wDict = wordsLoader.loadDictionary(TEST_DICT);
-        game = new WordleGame(wDict);
+        game = new WordleGame(wDict,logger);
 
     }
 

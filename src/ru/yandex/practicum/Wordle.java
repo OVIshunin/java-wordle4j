@@ -8,26 +8,32 @@ public class Wordle {
 
     public static void main(String[] args) {
 
-        WordleGame game = null; //объявляем до блока try, чтобы потом можно было использовать в блоке catch
-        try {
-            WordleDictionaryLoader wordsLoader = new WordleDictionaryLoader();
-            WordleDictionary wDict = wordsLoader.loadDictionary("words_ru.txt");
+        //создадим переменную под логгер в основном классе
+        WordleLogger logger = null;
 
-            game = new WordleGame(wDict);
+        try {
+            logger = new WordleLogger(); //инициализация логгера в блоке try, так как тоже возможен IOException
+            WordleDictionaryLoader wordsLoader = new WordleDictionaryLoader(logger);//передаем в загрузчик
+            WordleDictionary wDict = wordsLoader.loadDictionary("words_ru.txt");
+            WordleGame game = new WordleGame(wDict, logger);//передаем в класс игры
             //все System.in и System.out, сканнер - перенесены в метод класса Wordle,
             // класс WordleGame только предоставляет свои методы
             startGame(game);
 
         } catch (IOException e) {
             System.err.println("Ошибка загрузки словаря: " + e.getMessage());
-            if (game != null) {
-                game.setLog("Ошибка загрузки словаря: " + e.getMessage());
+            if (logger != null) {
+                logger.log("Ошибка загрузки словаря: " + e.getMessage());
             }
             //добавлена обработка всех иных исключений с выводом в консоль и записью в лог
-        } catch  (Exception e) {
+        } catch (Exception e) {
             System.err.println("Ошибка: " + e.getMessage());
-            if (game != null) {
-                game.setLog("Ошибка: " + e.getMessage());
+            if (logger != null) {
+                logger.log("Ошибка: " + e.getMessage());
+            }
+        } finally {
+            if (logger != null) {
+                logger.close();//закрываем
             }
         }
     }

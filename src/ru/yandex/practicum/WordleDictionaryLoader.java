@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class WordleDictionaryLoader {
+    private final WordleLogger logger;
+
+    public WordleDictionaryLoader(WordleLogger logger) {
+        this.logger = logger;
+    }
 
     public WordleDictionary loadDictionary(String filename) throws IOException, LoadedDictionaryIsEmpty {
         WordleDictionary words = new WordleDictionary();
@@ -20,8 +25,10 @@ public class WordleDictionaryLoader {
             }
         }
         if (words.getWordsList().size() == 0) {
-           throw new LoadedDictionaryIsEmpty();
+            logger.log("Ошибка: Загруженный справочник пуст");
+            throw new LoadedDictionaryIsEmpty();
         } else {
+            logger.log("Справочник успешно загружен, количество слов: " + words.getWordsList().size());
             return words;
         }
     }
